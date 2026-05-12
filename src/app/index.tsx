@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TextInput, 
-  Pressable, 
-  Switch, 
-  useWindowDimensions 
-} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../context/ThemeContext';
-import { useNotes, Note } from '../context/NotesContext';
+import React, { useState } from 'react';
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Note, useNotes } from '../context/NotesContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Index() {
   const router = useRouter();
   const { theme, isDark, toggleTheme, colors } = useTheme();
   const { notes } = useNotes();
   const { width } = useWindowDimensions();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredNotes = notes.filter(note => 
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredNotes = notes.filter(note =>
+    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -31,14 +31,18 @@ export default function Index() {
 
   const renderNoteCard = ({ item }: { item: Note }) => {
     const cardBaseStyle = styles.card;
-    const cardThemeStyle = { backgroundColor: colors.surface };
+    // Polish: remove heavy shadows, use subtle borders, flatter layout
+    const cardThemeStyle = { 
+      backgroundColor: colors.surface,
+      borderColor: isDark ? '#38383A' : '#EAEAEF', 
+    };
     const cardWrapper = [cardBaseStyle, cardThemeStyle];
 
     return (
-      <Pressable 
+      <Pressable
         style={({ pressed }) => StyleSheet.compose(
-          StyleSheet.flatten(cardWrapper), 
-          pressed && { opacity: 0.8 }
+          StyleSheet.flatten(cardWrapper),
+          pressed && { opacity: 0.7, transform: [{ scale: 0.98 }] }
         )}
         onPress={() => router.push(`/note/${item.id}`)}
       >
@@ -49,7 +53,7 @@ export default function Index() {
           {item.content || 'No content...'}
         </Text>
         <Text style={[styles.cardTimestamp, { color: colors.textSecondary }]}>
-          {new Date(item.timestamp).toLocaleDateString()}
+          {new Date(item.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
         </Text>
       </Pressable>
     );
@@ -59,30 +63,36 @@ export default function Index() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.textPrimary }]}>Notes</Text>
-        <View style={styles.themeToggleContainer}>
-          <Text style={[styles.themeLabel, { color: colors.textSecondary }]}>Dark Mode</Text>
-          <Switch 
-            value={isDark}
-            onValueChange={toggleTheme}
-            trackColor={{ false: '#E5E5EA', true: colors.primary }}
+        <Pressable 
+          onPress={toggleTheme} 
+          style={({ pressed }) => [
+            styles.themeToggleContainer,
+            { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7' },
+            pressed && { opacity: 0.7, transform: [{ scale: 0.95 }] }
+          ]}
+        >
+          <Ionicons 
+            name={isDark ? "sunny" : "moon"} 
+            size={20} 
+            color={colors.textPrimary} 
           />
-        </View>
+        </Pressable>
       </View>
 
       <View style={styles.searchContainer}>
-        <TextInput 
+        <TextInput
           style={[
-            styles.searchInput, 
-            { backgroundColor: colors.surface, color: colors.textPrimary }
+            styles.searchInput,
+            { backgroundColor: isDark ? '#2C2C2E' : '#F2F2F7', color: colors.textPrimary }
           ]}
-          placeholder="Search notes..."
+          placeholder="Search..."
           placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
       </View>
 
-      <FlatList 
+      <FlatList
         data={filteredNotes}
         keyExtractor={item => item.id}
         renderItem={renderNoteCard}
@@ -91,10 +101,19 @@ export default function Index() {
           isTablet && styles.listContentTablet
         ]}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No notes found.</Text>
+          </View>
+        }
       />
 
-      <Pressable 
-        style={[styles.fab, { backgroundColor: colors.primary }]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.fab, 
+          { backgroundColor: colors.primary },
+          pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }
+        ]}
         onPress={() => router.push('/note/new')}
       >
         <Text style={[styles.fabText, { color: '#000' }]}>+</Text>
@@ -113,66 +132,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 8,
+    paddingBottom: 16,
   },
   title: {
     fontSize: 34,
-    fontWeight: '700',
-    letterSpacing: 0.4,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   themeToggleContainer: {
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-  },
-  themeLabel: {
-    fontSize: 13,
-    fontWeight: '500',
   },
   searchContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
   searchInput: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 9999, // Pill shape
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
     fontSize: 17,
+    fontWeight: '500',
   },
   listContent: {
     paddingHorizontal: 24,
-    paddingBottom: 100, // accommodate FAB
+    paddingBottom: 120, // accommodate FAB
     gap: 16,
   },
   listContentTablet: {
     paddingHorizontal: 64, // wider padding for tablets
   },
   card: {
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    // Removed old shadows. We are flattening this out.
   },
   cardTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: -0.3,
+    marginBottom: 6,
   },
   cardContent: {
-    fontSize: 17,
+    fontSize: 16,
     lineHeight: 22,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   cardTimestamp: {
     fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 40,
+  },
+  emptyText: {
+    fontSize: 17,
     fontWeight: '500',
   },
   fab: {
     position: 'absolute',
-    bottom: 32,
+    bottom: 40,
     right: 32,
     width: 64,
     height: 64,
@@ -180,14 +207,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
   fabText: {
     fontSize: 32,
-    fontWeight: '400',
-    marginTop: -2,
+    fontWeight: '300',
+    marginTop: -4,
   }
 });

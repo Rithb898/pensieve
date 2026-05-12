@@ -1,12 +1,11 @@
 import { Stack } from 'expo-router';
-import { ThemeProvider } from '../context/ThemeContext';
-import { NotesProvider } from '../context/NotesContext';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '../context/ThemeContext';
+import { NotesProvider } from '../context/NotesContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 function RootStack() {
   const { isDark } = useTheme();
-  
+
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
