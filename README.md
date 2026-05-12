@@ -4,10 +4,10 @@ Pensieve is a clean React Native notes app built with Expo for a mobile developm
 
 ## Screenshots
 
-| | |
-| --- | --- |
+|                                                                                             |                                                                                             |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | ![Notes app screenshot 1](assets/images/screen-shoots/Screenshot%202026-05-12%20222957.png) | ![Notes app screenshot 2](assets/images/screen-shoots/Screenshot%202026-05-12%20223012.png) |
-| ![Notes app screenshot 3](assets/images/screen-shoots/Screenshot%202026-05-12%20223116.png) | |
+| ![Notes app screenshot 3](assets/images/screen-shoots/Screenshot%202026-05-12%20223116.png) |                                                                                             |
 
 ## Features
 
